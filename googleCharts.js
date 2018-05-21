@@ -1,7 +1,7 @@
 const loadScript = Symbol('loadScript');
 
 class googleCharts {
-    [loadScript]() {
+    [loadScript](lang) {
         if (!this.scriptPromise) {
             this.scriptPromise = new Promise((resolve) => {
                 const body = document.getElementsByTagName('body')[0]
@@ -9,8 +9,11 @@ class googleCharts {
                 script.type = 'text/javascript'
                 script.onload = function () {
                     GoogleCharts.api = window.google
-                    GoogleCharts.api.charts.load('current', {'packages': ['corechart', 'table']});
-                    GoogleCharts.api.charts.setOnLoadCallback(() => {
+                    if (lang)
+                        GoogleCharts.api.charts.load('current', {'packages': ['corechart', 'table'], language: lang});
+                    else
+                        GoogleCharts.api.charts.load('current', {'packages': ['corechart', 'table'], language: 'en'});
+                  GoogleCharts.api.charts.setOnLoadCallback(() => {
                         resolve()
                     })
                 }
@@ -21,8 +24,8 @@ class googleCharts {
         return this.scriptPromise
     }
 
-    load(callback, type) {
-        return this[loadScript]().then(() => {
+    load(callback, type, lang) {
+        return this[loadScript](lang).then(() => {
             if (type) {
                 if(!Array.isArray(type)) {
                     type=[type]
